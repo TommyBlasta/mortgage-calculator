@@ -1,0 +1,895 @@
+<title>Mortgage Calculator</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap">
+<style>
+  :root {
+    --bg: #F5F6F8;
+    --card: #FFFFFF;
+    --card-border: #E2E5EA;
+    --text: #1A2332;
+    --text-muted: #6B7A8D;
+    --accent: #0D7C66;
+    --accent-hover: #0A6352;
+    --accent-light: #E8F5F1;
+    --input-bg: #F0F2F5;
+    --input-border: #D0D5DD;
+    --input-focus: #0D7C66;
+    --result-bg: #0D7C66;
+    --result-text: #FFFFFF;
+    --toggle-inactive: #E2E5EA;
+    --toggle-inactive-text: #6B7A8D;
+    --divider: #E8EAEE;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #111820;
+      --card: #1A2332;
+      --card-border: #2A3544;
+      --text: #E8ECF0;
+      --text-muted: #8899AA;
+      --accent: #2EC4A2;
+      --accent-hover: #26A88A;
+      --accent-light: #162E28;
+      --input-bg: #141D28;
+      --input-border: #2A3544;
+      --input-focus: #2EC4A2;
+      --result-bg: #1A3A32;
+      --result-text: #2EC4A2;
+      --toggle-inactive: #232F3E;
+      --toggle-inactive-text: #6B7A8D;
+      --divider: #232F3E;
+      --shadow: 0 1px 3px rgba(0,0,0,0.2), 0 4px 12px rgba(0,0,0,0.15);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #111820;
+    --card: #1A2332;
+    --card-border: #2A3544;
+    --text: #E8ECF0;
+    --text-muted: #8899AA;
+    --accent: #2EC4A2;
+    --accent-hover: #26A88A;
+    --accent-light: #162E28;
+    --input-bg: #141D28;
+    --input-border: #2A3544;
+    --input-focus: #2EC4A2;
+    --result-bg: #1A3A32;
+    --result-text: #2EC4A2;
+    --toggle-inactive: #232F3E;
+    --toggle-inactive-text: #6B7A8D;
+    --divider: #232F3E;
+    --shadow: 0 1px 3px rgba(0,0,0,0.2), 0 4px 12px rgba(0,0,0,0.15);
+    color-scheme: dark;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+    padding-inline: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding-block: 40px;
+    font-variant-numeric: tabular-nums;
+    min-height: 100%;
+  }
+
+  .page-wrap {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    justify-content: center;
+    width: 100%;
+    max-width: 960px;
+    transition: max-width 0.35s ease;
+  }
+
+  .page-wrap.collapsed {
+    max-width: 460px;
+  }
+
+  .main-col {
+    width: 460px;
+    max-width: 100%;
+    flex-shrink: 0;
+  }
+
+  .top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 28px;
+  }
+
+  .top-bar-left h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0 0 6px;
+    text-wrap: balance;
+  }
+
+  .top-bar-left .subtitle {
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    margin: 0;
+  }
+
+  .lang-toggle {
+    display: flex;
+    background: var(--toggle-inactive);
+    border-radius: 6px;
+    padding: 2px;
+    gap: 2px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .lang-toggle button {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    background: transparent;
+    color: var(--toggle-inactive-text);
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .lang-toggle button.active {
+    background: var(--card);
+    color: var(--text);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    padding: 24px;
+  }
+
+  .toggle {
+    display: flex;
+    background: var(--toggle-inactive);
+    border-radius: 8px;
+    padding: 3px;
+    margin-bottom: 24px;
+    gap: 3px;
+  }
+
+  .toggle button {
+    flex: 1;
+    padding: 10px 12px;
+    border: none;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    cursor: pointer;
+    background: transparent;
+    color: var(--toggle-inactive-text);
+    transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+  }
+
+  .toggle button.active {
+    background: var(--card);
+    color: var(--text);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+
+  .toggle button:not(.active):hover {
+    color: var(--text);
+  }
+
+  .field {
+    margin-bottom: 18px;
+  }
+
+  .field:last-of-type {
+    margin-bottom: 0;
+  }
+
+  label {
+    display: block;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .input-wrap .prefix,
+  .input-wrap .suffix {
+    position: absolute;
+    color: var(--text-muted);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    pointer-events: none;
+  }
+
+  .input-wrap .prefix { left: 14px; }
+  .input-wrap .suffix { right: 14px; }
+
+  input[type="number"],
+  input[type="text"] {
+    width: 100%;
+    padding: 12px 14px;
+    background: var(--input-bg);
+    border: 1.5px solid var(--input-border);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s;
+    font-variant-numeric: tabular-nums;
+    box-sizing: border-box;
+  }
+
+  input[type="number"]:focus,
+  input[type="text"]:focus {
+    border-color: var(--input-focus);
+  }
+
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type="number"] { -moz-appearance: textfield; }
+
+  .has-prefix input { padding-left: 36px; }
+  .has-suffix input { padding-right: 36px; }
+
+  .divider {
+    height: 1px;
+    background: var(--divider);
+    margin: 24px 0;
+  }
+
+  .result-block {
+    background: var(--result-bg);
+    border-radius: 10px;
+    padding: 20px 24px;
+    text-align: center;
+  }
+
+  .result-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--result-text);
+    opacity: 0.7;
+    margin: 0 0 6px;
+  }
+
+  .result-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--result-text);
+    margin: 0;
+    line-height: 1.2;
+  }
+
+  .summary {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 16px;
+  }
+
+  .summary-item {
+    text-align: center;
+    padding: 12px 8px;
+    background: var(--input-bg);
+    border-radius: 8px;
+  }
+
+  .summary-item .s-label {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    margin: 0 0 4px;
+  }
+
+  .summary-item .s-value {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0;
+  }
+
+  /* Expand button */
+  .expand-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 16px;
+    padding: 10px 16px;
+    width: 100%;
+    border: 1.5px dashed var(--input-border);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--accent);
+    font-family: inherit;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+    justify-content: center;
+  }
+
+  .expand-btn:hover {
+    background: var(--accent-light);
+    border-color: var(--accent);
+  }
+
+  .expand-btn .arrow {
+    display: inline-block;
+    transition: transform 0.25s ease;
+    font-size: 0.75rem;
+  }
+
+  .expand-btn.open .arrow {
+    transform: rotate(90deg);
+  }
+
+  /* Side panel */
+  .side-col {
+    width: 420px;
+    max-width: 100%;
+    flex-shrink: 1;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateX(-12px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    pointer-events: none;
+    position: absolute;
+    visibility: hidden;
+  }
+
+  .side-col.open {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: auto;
+    position: static;
+    visibility: visible;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .card-header h2 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 0;
+  }
+
+  .badge {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: var(--accent-light);
+    color: var(--accent);
+  }
+
+  .fields-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .fields-row .field {
+    margin-bottom: 0;
+  }
+
+  .reg-results {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .reg-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 14px;
+    background: var(--input-bg);
+    border-radius: 8px;
+    gap: 12px;
+  }
+
+  .reg-row .reg-left {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .reg-row .reg-name {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .reg-row .reg-detail {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  .reg-row .reg-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .reg-row .reg-value {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--text);
+    white-space: nowrap;
+  }
+
+  .status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .status-dot.pass { background: #16a34a; }
+  .status-dot.fail { background: #dc2626; }
+  .status-dot.neutral { background: var(--text-muted); }
+
+  .min-income-block {
+    margin-top: 14px;
+    padding: 14px 16px;
+    border-radius: 8px;
+    border: 1.5px dashed var(--input-border);
+    text-align: center;
+  }
+
+  .min-income-block .mi-label {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    margin: 0 0 4px;
+  }
+
+  .min-income-block .mi-value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin: 0;
+  }
+
+  @media (max-width: 700px) {
+    .page-wrap {
+      flex-direction: column;
+      align-items: center;
+    }
+    .main-col, .side-col {
+      width: 100%;
+      max-width: 460px;
+    }
+    .side-col.open {
+      transform: translateY(0);
+    }
+  }
+
+  @media (max-width: 440px) {
+    .fields-row {
+      grid-template-columns: 1fr;
+    }
+    .top-bar {
+      flex-direction: column;
+      gap: 12px;
+    }
+  }
+</style>
+
+<div class="page-wrap collapsed" id="page-wrap">
+  <div class="main-col">
+    <div class="top-bar">
+      <div class="top-bar-left">
+        <h1 data-i18n="title">Mortgage Calculator</h1>
+        <p class="subtitle" data-i18n="subtitle">Calculate monthly payments or find the loan you can afford</p>
+      </div>
+      <div class="lang-toggle">
+        <button id="lang-en" class="active" onclick="setLang('en')">EN</button>
+        <button id="lang-cs" onclick="setLang('cs')">CZ</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="toggle" role="tablist">
+        <button id="tab-payment" class="active" role="tab" aria-selected="true" onclick="setMode('payment')" data-i18n="tab_payment">Find Payment</button>
+        <button id="tab-sum" role="tab" aria-selected="false" onclick="setMode('sum')" data-i18n="tab_sum">Find Loan Amount</button>
+      </div>
+
+      <div class="field" id="field-principal">
+        <label for="principal" data-i18n="label_loan">Loan amount</label>
+        <div class="input-wrap has-prefix">
+          <span class="prefix">Kč</span>
+          <input type="text" id="principal" inputmode="numeric" value="4.000.000" oninput="formatAndCalc(this)">
+        </div>
+      </div>
+
+      <div class="field" id="field-payment" hidden>
+        <label for="monthly" data-i18n="label_monthly">Monthly payment</label>
+        <div class="input-wrap has-prefix">
+          <span class="prefix">Kč</span>
+          <input type="text" id="monthly" inputmode="numeric" value="20.000" oninput="formatAndCalc(this)">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="rate" data-i18n="label_rate">Annual interest rate</label>
+        <div class="input-wrap has-suffix">
+          <input type="number" id="rate" min="0" max="30" step="0.1" value="5.0" oninput="calculate()">
+          <span class="suffix">%</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="years" data-i18n="label_years">Loan duration (years)</label>
+        <div class="input-wrap has-suffix">
+          <input type="number" id="years" min="1" max="50" step="1" value="25" oninput="calculate()">
+          <span class="suffix" data-i18n="suffix_yr">yr</span>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="result-block">
+        <p class="result-label" id="result-label" data-i18n="result_monthly">Monthly payment</p>
+        <p class="result-value" id="result-value">&mdash;</p>
+      </div>
+
+      <div class="summary">
+        <div class="summary-item">
+          <p class="s-label" data-i18n="total_paid">Total paid</p>
+          <p class="s-value" id="total-paid">&mdash;</p>
+        </div>
+        <div class="summary-item">
+          <p class="s-label" data-i18n="total_interest">Total interest</p>
+          <p class="s-value" id="total-interest">&mdash;</p>
+        </div>
+      </div>
+
+      <button class="expand-btn" id="expand-btn" onclick="togglePanel()">
+        <span class="arrow">&#9654;</span>
+        <span data-i18n="expand_btn">Can I afford this?</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="side-col" id="side-col">
+    <div class="card">
+      <div class="card-header">
+        <h2 data-i18n="afford_title">ČNB Affordability Check</h2>
+        <span class="badge" data-i18n="afford_badge">Regulatory</span>
+      </div>
+
+      <div class="field">
+        <label for="income" data-i18n="label_income">Net monthly income</label>
+        <div class="input-wrap has-prefix">
+          <span class="prefix">Kč</span>
+          <input type="text" id="income" inputmode="numeric" value="50.000" oninput="formatAndCalc(this)">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="other-debt" data-i18n="label_debt">Existing monthly debt payments</label>
+        <div class="input-wrap has-prefix">
+          <span class="prefix">Kč</span>
+          <input type="text" id="other-debt" inputmode="numeric" value="0" oninput="formatAndCalc(this)">
+        </div>
+      </div>
+
+      <div class="fields-row field">
+        <div class="field">
+          <label for="dti-limit" data-i18n="label_dti">DTI limit (× annual income)</label>
+          <div class="input-wrap has-suffix">
+            <input type="number" id="dti-limit" min="1" max="20" step="0.5" value="8" oninput="calculate()">
+            <span class="suffix">×</span>
+          </div>
+        </div>
+        <div class="field">
+          <label for="dsti-limit" data-i18n="label_dsti">DSTI limit (% of income)</label>
+          <div class="input-wrap has-suffix">
+            <input type="number" id="dsti-limit" min="1" max="100" step="1" value="45" oninput="calculate()">
+            <span class="suffix">%</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="reg-results">
+        <div class="reg-row">
+          <div class="reg-left">
+            <span class="reg-name">DTI — Debt-to-Income</span>
+            <span class="reg-detail" id="dti-detail" data-i18n="dti_desc">Total debt ÷ annual income</span>
+          </div>
+          <div class="reg-right">
+            <span class="reg-value" id="dti-value">—</span>
+            <span class="status-dot neutral" id="dti-dot"></span>
+          </div>
+        </div>
+        <div class="reg-row">
+          <div class="reg-left">
+            <span class="reg-name">DSTI — Debt Service-to-Income</span>
+            <span class="reg-detail" id="dsti-detail" data-i18n="dsti_desc">Monthly payments ÷ monthly income</span>
+          </div>
+          <div class="reg-right">
+            <span class="reg-value" id="dsti-value">—</span>
+            <span class="status-dot neutral" id="dsti-dot"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="min-income-block">
+        <p class="mi-label" data-i18n="min_income_label">Minimum net monthly income required</p>
+        <p class="mi-value" id="min-income">—</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const i18n = {
+    en: {
+      title: 'Mortgage Calculator',
+      subtitle: 'Calculate monthly payments or find the loan you can afford',
+      tab_payment: 'Find Payment',
+      tab_sum: 'Find Loan Amount',
+      label_loan: 'Loan amount',
+      label_monthly: 'Monthly payment',
+      label_rate: 'Annual interest rate',
+      label_years: 'Loan duration (years)',
+      suffix_yr: 'yr',
+      result_monthly: 'Monthly payment',
+      result_loan: 'Affordable loan amount',
+      total_paid: 'Total paid',
+      total_interest: 'Total interest',
+      expand_btn: 'Can I afford this?',
+      afford_title: 'ČNB Affordability Check',
+      afford_badge: 'Regulatory',
+      label_income: 'Net monthly income',
+      label_debt: 'Existing monthly debt payments',
+      label_dti: 'DTI limit (× annual income)',
+      label_dsti: 'DSTI limit (% of income)',
+      dti_desc: 'Total debt ÷ annual income',
+      dsti_desc: 'Monthly payments ÷ monthly income',
+      min_income_label: 'Minimum net monthly income required',
+      enter_income: 'Enter income to check',
+      limit: 'limit',
+      mo: '/mo',
+    },
+    cs: {
+      title: 'Hypoteční kalkulačka',
+      subtitle: 'Vypočítejte měsíční splátky nebo zjistěte, kolik si můžete půjčit',
+      tab_payment: 'Najít splátku',
+      tab_sum: 'Najít výši úvěru',
+      label_loan: 'Výše úvěru',
+      label_monthly: 'Měsíční splátka',
+      label_rate: 'Roční úroková sazba',
+      label_years: 'Doba splácení (roky)',
+      suffix_yr: 'let',
+      result_monthly: 'Měsíční splátka',
+      result_loan: 'Dostupná výše úvěru',
+      total_paid: 'Celkem zaplaceno',
+      total_interest: 'Celkem na úrocích',
+      expand_btn: 'Mohu si to dovolit?',
+      afford_title: 'Kontrola dle ČNB',
+      afford_badge: 'Regulace',
+      label_income: 'Čistý měsíční příjem',
+      label_debt: 'Stávající měsíční splátky',
+      label_dti: 'Limit DTI (× roční příjem)',
+      label_dsti: 'Limit DSTI (% příjmu)',
+      dti_desc: 'Celkový dluh ÷ roční příjem',
+      dsti_desc: 'Měsíční splátky ÷ měsíční příjem',
+      min_income_label: 'Minimální požadovaný čistý měsíční příjem',
+      enter_income: 'Zadejte příjem pro kontrolu',
+      limit: 'limit',
+      mo: '/měs',
+    }
+  };
+
+  let lang = 'en';
+  let mode = 'payment';
+  let panelOpen = false;
+
+  function setLang(l) {
+    lang = l;
+    document.getElementById('lang-en').classList.toggle('active', l === 'en');
+    document.getElementById('lang-cs').classList.toggle('active', l === 'cs');
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if (i18n[l][key]) el.textContent = i18n[l][key];
+    });
+    calculate();
+  }
+
+  function t(key) {
+    return i18n[lang][key] || i18n.en[key] || key;
+  }
+
+  function togglePanel() {
+    panelOpen = !panelOpen;
+    document.getElementById('side-col').classList.toggle('open', panelOpen);
+    document.getElementById('page-wrap').classList.toggle('collapsed', !panelOpen);
+    document.getElementById('expand-btn').classList.toggle('open', panelOpen);
+    if (panelOpen) calculate();
+  }
+
+  function dotFmt(n) {
+    return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  }
+
+  function parseDots(str) {
+    return parseInt(str.replace(/\./g, '').replace(/[^\d]/g, ''), 10) || 0;
+  }
+
+  function formatAndCalc(el) {
+    const raw = el.value.replace(/[^\d]/g, '');
+    if (raw === '') { el.value = ''; calculate(); return; }
+    const num = parseInt(raw, 10);
+    const formatted = dotFmt(num);
+    const cursorFromEnd = el.value.length - (el.selectionStart || 0);
+    el.value = formatted;
+    const pos = Math.max(0, formatted.length - cursorFromEnd);
+    el.setSelectionRange(pos, pos);
+    calculate();
+  }
+
+  function setMode(m) {
+    mode = m;
+    document.getElementById('tab-payment').classList.toggle('active', m === 'payment');
+    document.getElementById('tab-sum').classList.toggle('active', m === 'sum');
+    document.getElementById('tab-payment').setAttribute('aria-selected', m === 'payment');
+    document.getElementById('tab-sum').setAttribute('aria-selected', m === 'sum');
+    document.getElementById('field-principal').hidden = m === 'sum';
+    document.getElementById('field-payment').hidden = m === 'payment';
+    calculate();
+  }
+
+  function fmt(n) {
+    return dotFmt(n) + ' Kč';
+  }
+
+  function calculate() {
+    const rateAnnual = parseFloat(document.getElementById('rate').value);
+    const years = parseFloat(document.getElementById('years').value);
+
+    if (isNaN(rateAnnual) || isNaN(years) || years <= 0) {
+      setResult('—', '—', '—');
+      calcRegulatory(0, 0);
+      return;
+    }
+
+    const n = years * 12;
+    const r = rateAnnual / 100 / 12;
+
+    if (mode === 'payment') {
+      const P = parseDots(document.getElementById('principal').value);
+      if (P <= 0) { setResult('—', '—', '—'); calcRegulatory(0, 0); return; }
+
+      let M;
+      if (r === 0) { M = P / n; }
+      else { M = P * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1); }
+
+      const totalPaid = M * n;
+      const totalInterest = totalPaid - P;
+
+      document.getElementById('result-label').textContent = t('result_monthly');
+      setResult(fmt(M), fmt(totalPaid), fmt(totalInterest));
+      calcRegulatory(M, P);
+    } else {
+      const M = parseDots(document.getElementById('monthly').value);
+      if (M <= 0) { setResult('—', '—', '—'); calcRegulatory(0, 0); return; }
+
+      let P;
+      if (r === 0) { P = M * n; }
+      else { P = M * (Math.pow(1 + r, n) - 1) / (r * Math.pow(1 + r, n)); }
+
+      const totalPaid = M * n;
+      const totalInterest = totalPaid - P;
+
+      document.getElementById('result-label').textContent = t('result_loan');
+      setResult(fmt(P), fmt(totalPaid), fmt(totalInterest));
+      calcRegulatory(M, P);
+    }
+  }
+
+  function setResult(main, total, interest) {
+    document.getElementById('result-value').textContent = main;
+    document.getElementById('total-paid').textContent = total;
+    document.getElementById('total-interest').textContent = interest;
+  }
+
+  function calcRegulatory(monthlyPayment, loanAmount) {
+    if (!panelOpen) return;
+
+    const income = parseDots(document.getElementById('income').value);
+    const otherDebt = parseDots(document.getElementById('other-debt').value);
+    const dtiLimit = parseFloat(document.getElementById('dti-limit').value);
+    const dstiLimit = parseFloat(document.getElementById('dsti-limit').value);
+
+    const dtiEl = document.getElementById('dti-value');
+    const dtiDot = document.getElementById('dti-dot');
+    const dtiDetail = document.getElementById('dti-detail');
+    const dstiEl = document.getElementById('dsti-value');
+    const dstiDot = document.getElementById('dsti-dot');
+    const dstiDetail = document.getElementById('dsti-detail');
+    const minEl = document.getElementById('min-income');
+
+    if (!monthlyPayment || !loanAmount || isNaN(dtiLimit) || isNaN(dstiLimit)) {
+      dtiEl.textContent = '—';
+      dstiEl.textContent = '—';
+      dtiDot.className = 'status-dot neutral';
+      dstiDot.className = 'status-dot neutral';
+      dtiDetail.textContent = t('dti_desc');
+      dstiDetail.textContent = t('dsti_desc');
+      minEl.textContent = '—';
+      return;
+    }
+
+    const totalDebt = loanAmount;
+    const totalMonthlyDebt = monthlyPayment + otherDebt;
+    const minIncomeDTI = totalDebt / dtiLimit / 12;
+    const minIncomeDSTI = totalMonthlyDebt / (dstiLimit / 100);
+    const minRequired = Math.max(minIncomeDTI, minIncomeDSTI);
+    minEl.textContent = fmt(minRequired);
+
+    if (income > 0) {
+      const annualIncome = income * 12;
+      const dtiRatio = totalDebt / annualIncome;
+      const dstiRatio = (totalMonthlyDebt / income) * 100;
+
+      dtiEl.textContent = dtiRatio.toFixed(1) + '×';
+      dtiDot.className = 'status-dot ' + (dtiRatio <= dtiLimit ? 'pass' : 'fail');
+      dtiDetail.textContent = fmt(totalDebt) + ' ÷ ' + fmt(annualIncome) + ' (' + t('limit') + ' ' + dtiLimit + '×)';
+
+      dstiEl.textContent = dstiRatio.toFixed(0) + ' %';
+      dstiDot.className = 'status-dot ' + (dstiRatio <= dstiLimit ? 'pass' : 'fail');
+      dstiDetail.textContent = fmt(totalMonthlyDebt) + t('mo') + ' ÷ ' + fmt(income) + t('mo') + ' (' + t('limit') + ' ' + dstiLimit + ' %)';
+    } else {
+      dtiEl.textContent = '—';
+      dstiEl.textContent = '—';
+      dtiDot.className = 'status-dot neutral';
+      dstiDot.className = 'status-dot neutral';
+      dtiDetail.textContent = t('enter_income');
+      dstiDetail.textContent = t('enter_income');
+    }
+  }
+
+  calculate();
+</script>
