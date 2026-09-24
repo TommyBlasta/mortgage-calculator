@@ -401,8 +401,14 @@ input[type="number"] { -moz-appearance: textfield; }
   gap: 12px;
 }
 
-.fields-row .field {
+.fields-row > .field {
+  display: flex;
+  flex-direction: column;
   margin-bottom: 0;
+}
+
+.fields-row > .field .input-wrap {
+  margin-top: auto;
 }
 
 .reg-results {
